@@ -23,22 +23,18 @@ npm install
 ```
 
 ```
-node 2_generate_keys.js
-```
-
+node 2_generate_keys.js     //PS C:\Users\mshlc\Documents\MshlBackEndApp\scripts>
 This will generate a `keys.json` file. Keep it safe and secure. This will be needed for the next step.
 
-### SGenerate Public Keys using a Server
 
-```
-command node 3_serve_keys.js
-```
+### SGenerate Public Keys to local server
+node 3_serve_keys.js      //PS C:\Users\mshlc\Documents\MshlBackEndApp\scripts>   
+
 
 Expose to the public using Ngrok or Cloudflare Tunnels
+ngrok tunnel --label edge=edghts_2qufkE1obnI9MR9ncFzwTOBh1dt http://localhost:3000  ///MshlBackEndApp```
 
-```
-//ngrok tunnel --label edge=edghts_2qufkE1obnI9MR9ncFzwTOBh1dt http://localhost:3000
-```
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 ### Run a Development SMTP Server

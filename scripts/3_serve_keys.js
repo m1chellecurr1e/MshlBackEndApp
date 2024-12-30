@@ -5,13 +5,13 @@ import jose from 'node-jose'
 const app = express()
 
 app.get('/jwks', async (req, res) => {
-  const ks = fs.readFileSync('keys.json')
+  const ks = fs.readFileSync('C:\\Users\\mshlc\\Documents\\MshlBackEndApp\\keys.json')
   const keyStore = await jose.JWK.asKeyStore(ks.toString())
   res.json(keyStore.toJSON())
 })
 
 app.get('/', async (req, res) => {
-  res.send('Hello World!')
+  res.send('Hello World')
 })
 
 app.listen(3000,()=>{
