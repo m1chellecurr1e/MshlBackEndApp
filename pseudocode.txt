@@ -1,0 +1,13 @@
+Prerequisites:
+    - Have a key .json generated using 2_generate_keys.js
+    - Expose key.json public key on a public URL https://https://absolutely-pretty-stingray.ngrok-free.app/jwts
+
+Steps:
+- Read the private key (keys.json) and make a signed JWT
+- Use the JWT to get an access token
+- Use the access token to make a request to Bulk API
+- Wait for the Bulk API response to become available
+- Parse the Bult API response and get all resources in a JSON object (from NDJOSN)
+- CHeck the resources for abnormal lab results
+- if abnormal labs found, send an email 
+- scheudle to run the above function every 24 hours
