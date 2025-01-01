@@ -27,7 +27,7 @@ node 2_generate_keys.js     //PS C:\Users\mshlc\Documents\MshlBackEndApp\scripts
 This will generate a `keys.json` file. Keep it safe and secure. This will be needed for the next step.
 
 
-### SGenerate Public Keys to local server
+### SGenerate Public Keys to localhost:3000
 node 3_serve_keys.js      //PS C:\Users\mshlc\Documents\MshlBackEndApp\scripts>   
 
 
