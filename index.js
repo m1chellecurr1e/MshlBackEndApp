@@ -3,6 +3,7 @@ import fs from 'fs';
 import jose from 'node-jose';
 import { randomUUID } from "crypto"
 import axios from 'axios'
+import hyperquest from 'hyperquest';
 
 const clientId = "98ef83f1-954f-4d30-9516-231aa35499a2"
 const tokenEndpoint = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token"
@@ -43,64 +44,72 @@ const makeTokenRequest = async () => {
 	return tokenResponse.data
 }
 
-// const KickOffBulkDataExport = async (accessToken) => {
-// 	const bulkKickOffResponse = await axios.get(`${fhirbaseURL}/Group/${groupID}/$export`, {
-// 		params: {
-// 			_type: 'patient,observation',
-// 			_typeFilter: 'Observation?category=laboratory',
-// 		},
-// 		headers: {
-// 			Accept: 'application/fhir+json',
-// 			Authorization: `Bearer ${accessToken}`,
-// 			Prefer: 'respond-async'
-// 		}
-// 	}) 
-// 	return bulkKickOffResponse.headers.get('Content-Location')
-// }
+const KickOffBulkDataExport = async (accessToken) => {
+	const bulkKickOffResponse = await axios.get(`${fhirbaseURL}/Group/${groupID}/$export`, {
+		params: {
+			_type: 'patient,observation',
+			_typeFilter: 'Observation?category=laboratory',
+		},
+		headers: {
+			Accept: 'application/fhir+json',
+			Authorization: `Bearer ${accessToken}`,
+			Prefer: 'respond-async'
+		}
+	}) 
+	return bulkKickOffResponse.headers.get('Content-Location')
+}
 
-// const pollAndWaitForExport = async (url, accessToken, secsToWait) => {
-// 	try {
-// 		const response = await axios.get(url, {
-// 			headers: {
-// 				Authorization: `Bearer ${accessToken}`,
-// 			}
-// 		})
-// 		const progress = response.headers.get('X-Progress')
-// 		const status = response.status
-// 		const data = response.data
-// 		console.log({url, status, progress, data})
-// 		if (response.status == 200) {
-// 			return response.data
-// 		}
-// 	} catch (e) {
-// 		console.log("Error trying to get bulk request", e);	
-// 	}
-// 	console.log(`waiting ${secsToWait} secs`)
-// 	await new Promise(resolve => setTimeout(resolve, secsToWait * 1000))
-// 	return await pollAndWaitForExport(url, accessToken, secsToWait)
-// }
+const pollAndWaitForExport = async (url, accessToken, secsToWait) => {
+	try {
+		const response = await axios.get(url, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			}
+		})
+		const progress = response.headers.get('X-Progress')
+		const status = response.status
+		const data = response.data
+		console.log({url, status, progress, data})
+		if (response.status == 200) {
+			return response.data
+		}
+	} catch (e) {
+		console.log("Error trying to get bulk request", e);	
+	}
+	console.log(`waiting ${secsToWait} secs`)
+	await new Promise(resolve => setTimeout(resolve, secsToWait * 1000))
+	return await pollAndWaitForExport(url, accessToken, secsToWait)
+}
 
-// const processBulkResponse = async (bundleResponse, accessToken) => {
-// 	const promises = bundleResponse.output?.map(async (output) => {
-// 		const url = output.url
-// 		const response = await axios.get(url, {
-// 			headers: {
-// 				Authorization: `Bearer ${accessToken}`,
-// 			}
-// 		})	
-// 		return {url, data: response.data, type: output.type}		
-// 	})
-// 	return Promise.all(promises)
-// }
+const processBulkResponse = async (bundleResponse, accessToken) => {
+	const promises = bundleResponse.output?.map((output) => {
+			const url = output.url;
+			return new Promise((resolve) => {
+					const stream = hyperquest(url, {
+							headers: {
+									Authorization: `Bearer ${accessToken}`,
+							},
+					});
+					stream.pipe(ndjson.parse()).on("data", (data) => console.log(data));
+					stream.on("error", resolve);
+					stream.on("end", resolve);
+			});
+	});
+	return await Promise.all(promises);
+};
 
+const main = async () => {
 const tokenResponse = await makeTokenRequest()
 const accessToken = tokenResponse.access_token
+console.log({accessToken})
 
 
-// const contentLocation = await KickOffBulkDataExport(accessToken)
-// const bulkDataResponse = await pollAndWaitForExport(contentLocation, accessToken, 5)
+const contentLocation = await KickOffBulkDataExport(accessToken)
+console.log({contentLocation})
+const bulkDataResponse = await pollAndWaitForExport(contentLocation, accessToken, 10)
 // const bulkData = await pollAndWaitForExport(contentLocation)
-// console.log(bulkDataResponse)
+console.log(bulkDataResponse)
+await processBulkResponse(bulkDataResponse, accessToken)
 
 // const getWaitTime = () => {
 //     // Logic to determine wait time
@@ -117,8 +126,8 @@ const accessToken = tokenResponse.access_token
 // } else {
 //     console.error('Error: waitTime is not a valid number.');
 // }
-
-
+}
+main()
 
 
 
