@@ -51,7 +51,7 @@ Browse the Web UI on 1080.
 Use the SMTP server on localhost:1025
 
 ```
-node scripts\5_send_test_email.js
+node scripts\6_send_test_email_ethereal.js
 ```
 
 Check the email show up on http://localhost:1080
